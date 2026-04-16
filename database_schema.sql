@@ -1,47 +1,70 @@
--- Base de Datos para Simulador de Míster
--- Diseñado para el módulo de Bases de Datos (1º DAW)
+-- Base de dades teòrica per l'Observatori Blaugrana
+-- Projecte Intermodular (1r DAW)
 
-CREATE DATABASE IF NOT EXISTS mister_fcb;
-USE mister_fcb;
+CREATE DATABASE IF NOT EXISTS fcb_observatori_db;
+USE fcb_observatori_db;
 
--- Taula d'usuaris (Gestió dels jugadors del simulador)
-CREATE TABLE usuaris (
-    id_usuari INT AUTO_INCREMENT PRIMARY KEY,
-    nom_usuari VARCHAR(50) NOT NULL UNIQUE,
-    correu VARCHAR(100) NOT NULL UNIQUE,
-    contrasenya VARCHAR(255) NOT NULL, -- S'ha d'encriptar (Bcrypt/Argon2)
-    data_registre TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    pressupost_actual DECIMAL(15,2) DEFAULT 250000000.00
-);
-
--- Taula de plantilla/jugadors (Mercat i dades fixes)
+-- 1. Taula 'jugadors'
+-- Guarda la informació central i física dels membres de la plantilla.
 CREATE TABLE jugadors (
-    id_jugador INT AUTO_INCREMENT PRIMARY KEY,
+    id_jugador INT PRIMARY KEY,
     nom_complet VARCHAR(100) NOT NULL,
+    dorsal INT UNIQUE NOT NULL,
     posicio ENUM('POR', 'DEF', 'MIG', 'DEL') NOT NULL,
-    mitjana INT NOT NULL CHECK(mitjana BETWEEN 50 AND 99),
-    preu_mercat DECIMAL(12,2) NOT NULL,
-    salari DECIMAL(12,2) NOT NULL,
-    nacionalitat VARCHAR(50)
+    dades_url_foto VARCHAR(255)
 );
 
--- Inserció d'un usuari de prova
-INSERT INTO usuaris (nom_usuari, correu, contrasenya) 
-VALUES ('admin', 'admin@fcb.cat', '123456');
-
--- Inserció manual d'alguns jugadors de prova (L'aplicació carrega via JSON però la BD persistiria aquesta informació si fos full-stack)
-INSERT INTO jugadors (nom_complet, posicio, mitjana, preu_mercat, salari, nacionalitat) VALUES
-('Lamine Yamal', 'DEL', 86, 120000000.00, 150000.00, 'Spain'),
-('Pedri', 'MIG', 86, 80000000.00, 240000.00, 'Spain'),
-('Marc-André ter Stegen', 'POR', 89, 35000000.00, 105000.00, 'Germany'),
-('Ronald Araujo', 'DEF', 86, 70000000.00, 210000.00, 'Uruguay');
-
--- Taula per vincular quins jugadors pertanyen a cada usuari (El "Save State")
-CREATE TABLE plantilla_usuari (
-    id_usuari INT,
-    id_jugador INT,
-    estatus ENUM('starter', 'bench', 'none') DEFAULT 'none',
-    PRIMARY KEY (id_usuari, id_jugador),
-    FOREIGN KEY (id_usuari) REFERENCES usuaris(id_usuari) ON DELETE CASCADE,
+-- 2. Taula 'estadistiques'
+-- Relació 1 a 1 amb jugadors per desacoblar les xifres canviants
+CREATE TABLE estadistiques (
+    id_jugador INT PRIMARY KEY,
+    gols_anotats INT DEFAULT 0,
+    assistencies INT DEFAULT 0,
+    targetes_grogues INT DEFAULT 0,
+    targetes_vermelles INT DEFAULT 0,
     FOREIGN KEY (id_jugador) REFERENCES jugadors(id_jugador) ON DELETE CASCADE
 );
+
+-- 3. Taula 'finances'
+-- Registra els costos contractuals de cada jugador
+CREATE TABLE finances (
+    id_jugador INT PRIMARY KEY,
+    salari_anual DECIMAL(15,2) NOT NULL,
+    valor_mercat DECIMAL(15,2) NOT NULL,
+    clausula_rescisio DECIMAL(15,2),
+    FOREIGN KEY (id_jugador) REFERENCES jugadors(id_jugador) ON DELETE CASCADE
+);
+
+-- 4. Taula 'infermeria'
+-- Registra la salut mèdica. Si un jugador hi apareix, es que està lesionat.
+CREATE TABLE infermeria (
+    id_part_medic INT AUTO_INCREMENT PRIMARY KEY,
+    id_jugador INT NOT NULL,
+    tipus_lesio VARCHAR(150) NOT NULL,
+    data_lesio DATE DEFAULT CURRENT_DATE,
+    temps_baixa_estimat_dies INT,
+    FOREIGN KEY (id_jugador) REFERENCES jugadors(id_jugador) ON DELETE CASCADE
+);
+
+-- ----------------------------------------------------
+-- EXEMPLES D'INSERCIÓ PER TESTEJAR LES CONSULTES (DML)
+-- ----------------------------------------------------
+
+INSERT INTO jugadors (id_jugador, nom_complet, dorsal, posicio) VALUES 
+(19, 'Lamine Yamal', 19, 'DEL'),
+(8, 'Pedri', 8, 'MIG'),
+(1, 'Marc-André ter Stegen', 1, 'POR');
+
+INSERT INTO estadistiques (id_jugador, gols_anotats, assistencies, targetes_grogues) VALUES
+(19, 6, 8, 1),
+(8, 3, 5, 0),
+(1, 0, 0, 0);
+
+INSERT INTO finances (id_jugador, salari_anual, valor_mercat) VALUES
+(19, 1600000.00, 150000000.00),
+(8, 5000000.00, 90000000.00),
+(1, 6300000.00, 35000000.00);
+
+-- Ingressem a Ter Stegen a l'hospital
+INSERT INTO infermeria (id_jugador, tipus_lesio, temps_baixa_estimat_dies) VALUES
+(1, 'Trencament del tendó rotulià de la cama dreta', 240);

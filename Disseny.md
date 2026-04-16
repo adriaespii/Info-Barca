@@ -1,32 +1,40 @@
-# 📑 Disseny i Planificació del Desenvolupament
+# 📑 Disseny i Arquitectura: Observatori Barça
 
-En aquesta secció es documenta el cicle de desenvolupament seguit que respecta el coneixement d'un estudiant de primer any.
+En aquest document especifiquem les fases i estructures que formen el cor tècnic de la plataforma. Ha sigut programat a consciència i des de zero evitant sobrecàrregues innecessàries, centrant-lo estrictament en els patrons indicats per l'institut.
 
-## 1. Mètode de Treball
-S'ha utilitzat una metodologia iterativa o descendent per poder avaluar el projecte segons les assignatures clau:
-1. **Fase Llenguatge de Marques:** Tot l'esquelet web muntat prèviament de forma estàtica.
-2. **Fase Estilització:** Addició del disseny visual mitjançant CSS puro (`style.css` incrustat segons l'arxiu HTML)
-3. **Fase Scripting:** Implantació de tota la "màgia" reactiva en Javascript per iterar els arrays de jugadors del mercat, pressupost, etc.
-4. **Fase Final:** Creació de l'squema de bases de dades documentat apart com el projecte de continuïtat de Bases de Dades.
+## 1. Patró Arquitectònic
+Ens trobem davant una web pràctica d'estil **Single-Page Application (SPA)** de cap a peus. L'HTML es descarrega una única vegada, i el propi Javascript natiu es l'encarregat d'ocultar i desocultar les seccions modificant el valor de les classes (`display: block` als `.active` vs el `display: none` genèric de la fulla d'estil global).
 
-Els passos s'han controlat fent servir la metodologia Kanban (To-Do, Doing, Done).
-
-## 2. Mapa d'Estats (JavaScript)
-Per fer funcionar tota la complexitat sense bases de dades reals que ho llastrin, l'estat global es controla emprant el següent objecte persistent en RAM i que sincronitza constantment amb un fitxer local `localStorage` de l'usuari:
+## 2. Mapa d'Estat (Dades)
+A diferència de projectes "dummy" on the tota la informació està fixada de manera "Hardcoded" a les carpetes d'etiquetes `<p>` i `<div>` de HTML, nosaltres emprarem un Model Dinàmic basat en un magatzem JSON local asíncron cridat `players.json`.
 
 ```javascript
-let state = {
-    budget: 250000000,
-    players: [],
-    stats: { matches: 0, wins: 0, draws: 0, losses: 0 }
-};
+// La variable base de tota la SPA
+let playersData = [];
+
+// Es carrega usant modernitat (ES6+)
+async function loadData() {
+    const response = await fetch('players.json');
+    playersData = await response.json();
+    renderPlantilla(); // Es criden els repintats del DOM.
+}
 ```
 
-Qualsevol decisió (com fer clic a un jugador o "contractar-ne" un des del mercat) simplement obre l'Array de jugadors, busca pel seu camp `id`, altera el permís per mostrar el botó com a no disponible o fitxat, actualitza els diners, i es processa un mètode anomenat `updateAll()` que re-renderitza el HTML amb un mètode `.map()` i els *Template Strings* de Javascript Modern.
+Aquest procés simula idènticament l'arquitectura del que seria tractar amb una EndPoint o API de segon curs (p.e: Mòdul de NodeJS amb Servidor).
 
-## 3. Disseny de la Base de Dades (Mòdul BD)
-S'ha preparat un document DDL `.sql` (`database_schema.sql`) dissenyat a mida amb taules minimalistes i relacions consistents tipus *un a molts*, emprant Primary i Foreign Keys. S'ha omès expressament poblacions hiper-massives i només es testegen amb usuaris base en llenguatge SQL d'estructura clàssica ensenyada al mòdul teòric.
+## 3. Estètica Corporal (CSS)
+Inspirant-mos en les normatives de claredat, s'han emprat colors extremadament plans a fons clars per reforçar l'experiència d'Usuari en relació amb la temàtica (Blaus al Botó o accents, etc). 
 
-## 4. UI/UX (Llenguatge de Marques)
-S'ha buscat una impressió d'estil "Manager de Consola".
-L'ús intensiu del `Grid` combinat amb variables `root` per colors ajuda enormement a obtenir aquest aire exclusiu de "eSports" fosc i dinàmic garantint que en telèfon mòbil funcioni tot mitjançant els *Media Queries* inserit al document CSS. S'ha prioritzat l'experiència tàctil creant la mecànica experimental del `HTML5 Drag and Drop API` perquè la configuració central de l'alineació se senti totalment professional, aconseguint esprémer a fons la capacitat bàsica de l'assignatura de programació.
+Per resoldre l'estructura visual adaptada en graella ("Cartes" dels jugadors) evitem utilitzar pre-processadors no exigits (veure cas Bootstrap o TailwindCSS per manca de necessitat) i ataquem amb:
+
+```css
+.grid-jugadors {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 2rem;
+}
+```
+Aquesta fòrmula resol qualsevol problema de resolució (*Responsive design*) amb l'afegit que al baixar a mides de telèfon s'escala automàticament a llistat d'1 sola columna de carta independent sense forçar els `Media Queries` a pic i pala.
+
+## 4. Tractament de les relacions d'SQL
+El document SQL redactat apart demostra la capacitat conceptual on visualitzem que a diferència del Model de Dades Local d'Objectes JavaScript actual, a Base de dades requeriria taules creuades (Infermeria pertany a un Jugador (FK) per garantir la solidesa del registre esportiu).
