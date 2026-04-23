@@ -325,11 +325,11 @@
                 
                 return `
                 <div class="card">
-                    <img src="\${p.image}" alt="\${p.name}" onclick="openModal(\${p.id})">
-                    <h3>\${p.name}</h3>
-                    <p>Posició: \${p.position}</p>
-                    <p>Dorsal: \${p.number}</p>
-                    <button class="btn-fav \${favClass}" onclick="toggleFavorit(\${p.id})">\${favText}</button>
+                    <img src="${p.image}" alt="${p.name}" onclick="openModal(${p.id})">
+                    <h3>${p.name}</h3>
+                    <p>Posició: ${p.position}</p>
+                    <p>Dorsal: ${p.number}</p>
+                    <button class="btn-fav ${favClass}" onclick="toggleFavorit(${p.id})">${favText}</button>
                 </div>
                 `;
             }).join('');
@@ -354,12 +354,12 @@
             const player = playersData.find(p => p.id === playerId);
             if (player) {
                 document.getElementById('modalBody').innerHTML = `
-                    <h2>\${player.name}</h2>
-                    <p><strong>Gols:</strong> \${player.goals}</p>
-                    <p><strong>Assistències:</strong> \${player.assists}</p>
-                    <p><strong>Targetes Grogues:</strong> \${player.yellowCards}</p>
-                    <p><strong>Salari:</strong> \${player.salary} €</p>
-                    <p><strong>Valor:</strong> \${player.value} €</p>
+                    <h2>${player.name}</h2>
+                    <p><strong>Gols:</strong> ${player.goals}</p>
+                    <p><strong>Assistències:</strong> ${player.assists}</p>
+                    <p><strong>Targetes Grogues:</strong> ${player.yellowCards}</p>
+                    <p><strong>Salari:</strong> ${player.salary} €</p>
+                    <p><strong>Valor:</strong> ${player.value} €</p>
                 `;
                 modal.style.display = "block";
             }
@@ -381,8 +381,8 @@
 
             container.innerHTML = injured.map(p => `
                 <div class="hospital-item">
-                    <h3>\${p.name}</h3>
-                    <p>Motiu: \${p.injuryDesc}</p>
+                    <h3>${p.name}</h3>
+                    <p>Motiu: ${p.injuryDesc}</p>
                 </div>
             `).join('');
         }
@@ -393,8 +393,8 @@
             const gols = [...playersData].sort((a,b) => b.goals - a.goals).slice(0,5);
             document.getElementById('topGolsBody').innerHTML = gols.map((p, i) => `
                 <tr>
-                    <td>\${i+1}. \${p.name}</td>
-                    <td>\${p.goals}</td>
+                    <td>${i+1}. ${p.name}</td>
+                    <td>${p.goals}</td>
                 </tr>
             `).join('');
 
@@ -402,8 +402,8 @@
             const assists = [...playersData].sort((a,b) => b.assists - a.assists).slice(0,5);
             document.getElementById('topAssistBody').innerHTML = assists.map((p, i) => `
                 <tr>
-                    <td>\${i+1}. \${p.name}</td>
-                    <td>\${p.assists}</td>
+                    <td>${i+1}. ${p.name}</td>
+                    <td>${p.assists}</td>
                 </tr>
             `).join('');
         }
