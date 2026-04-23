@@ -200,6 +200,17 @@
             margin-bottom: 20px;
         }
 
+        /* Imatge a estadístiques */
+        .stats-img {
+            width: 40px;
+            height: 40px;
+            object-fit: cover;
+            object-position: top center;
+            border-radius: 50%;
+            vertical-align: middle;
+            margin-right: 10px;
+        }
+
     </style>
 </head>
 <body>
@@ -449,7 +460,10 @@
             const gols = [...playersData].sort((a,b) => b.goals - a.goals).slice(0,5);
             document.getElementById('topGolsBody').innerHTML = gols.map((p, i) => `
                 <tr>
-                    <td>${i+1}. ${p.name}</td>
+                    <td>
+                        <img src="${p.image}" class="stats-img" alt="${p.name}">
+                        ${i+1}. ${p.name}
+                    </td>
                     <td>${p.goals}</td>
                 </tr>
             `).join('');
@@ -458,7 +472,10 @@
             const assists = [...playersData].sort((a,b) => b.assists - a.assists).slice(0,5);
             document.getElementById('topAssistBody').innerHTML = assists.map((p, i) => `
                 <tr>
-                    <td>${i+1}. ${p.name}</td>
+                    <td>
+                        <img src="${p.image}" class="stats-img" alt="${p.name}">
+                        ${i+1}. ${p.name}
+                    </td>
                     <td>${p.assists}</td>
                 </tr>
             `).join('');
