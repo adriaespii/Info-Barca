@@ -199,6 +199,7 @@
             <li><a class="nav-item active" data-target="plantilla">La Plantilla</a></li>
             <li><a class="nav-item" data-target="infermeria">Infermeria</a></li>
             <li><a class="nav-item" data-target="stats">Estadístiques</a></li>
+            <li><a class="nav-item" data-target="favorits">Favorits</a></li>
         </ul>
     </header>
 
@@ -243,6 +244,14 @@
                 <thead><tr><th>Jugador</th><th>Assistències</th></tr></thead>
                 <tbody id="topAssistBody"></tbody>
             </table>
+        </section>
+
+        <!-- SECCIÓ FAVORITS -->
+        <section id="favorits">
+            <h2>Els meus Favorits</h2>
+            <div class="grid-jugadors" id="favoritsGrid">
+                <!-- Els jugadors favorits apareixeran aquí -->
+            </div>
         </section>
     </main>
 
@@ -301,6 +310,7 @@
                 renderPlantilla();
                 renderInfermeria();
                 renderStats();
+                renderFavorits();
             } catch (error) {
                 console.error("Error:", error);
                 document.getElementById('jugadorsGrid').innerHTML = 
@@ -318,11 +328,11 @@
                 filteredPlayers = playersData.filter(p => p.position === currentFilter);
             }
 
-            const idFavorit = localStorage.getItem('jugador_favorit');
+            let favs = JSON.parse(localStorage.getItem('jugadors_favorits')) || [];
 
             // Ús de .map()
             grid.innerHTML = filteredPlayers.map(p => {
-                let isFav = (parseInt(idFavorit) === p.id);
+                let isFav = favs.includes(p.id);
                 let favClass = isFav ? "es-favorit" : "";
                 let favText = isFav ? "★ Favorit" : "☆ Marcar Favorit";
                 
@@ -338,15 +348,44 @@
             }).join('');
         }
 
-        // LocalStorage per Favorits
+        // LocalStorage per Favorits (Múltiples)
         window.toggleFavorit = function(playerId) {
-            const currentFav = localStorage.getItem('jugador_favorit');
-            if (currentFav == playerId) {
-                localStorage.removeItem('jugador_favorit');
+            let favs = JSON.parse(localStorage.getItem('jugadors_favorits')) || [];
+            
+            if (favs.includes(playerId)) {
+                favs = favs.filter(id => id !== playerId);
             } else {
-                localStorage.setItem('jugador_favorit', playerId);
+                favs.push(playerId);
             }
+            
+            localStorage.setItem('jugadors_favorits', JSON.stringify(favs));
             renderPlantilla();
+            renderFavorits();
+        }
+
+        // Mostrar Favorits
+        function renderFavorits() {
+            const grid = document.getElementById('favoritsGrid');
+            let favs = JSON.parse(localStorage.getItem('jugadors_favorits')) || [];
+            
+            let favoritePlayers = playersData.filter(p => favs.includes(p.id));
+
+            if (favoritePlayers.length === 0) {
+                grid.innerHTML = "<p style='grid-column: 1 / -1;'>No tens cap jugador favorit encara.</p>";
+                return;
+            }
+
+            grid.innerHTML = favoritePlayers.map(p => {
+                return `
+                <div class="card">
+                    <img src="${p.image}" alt="${p.name}" onclick="openModal(${p.id})">
+                    <h3>${p.name}</h3>
+                    <p>Posició: ${p.position}</p>
+                    <p>Dorsal: ${p.number}</p>
+                    <button class="btn-fav es-favorit" onclick="toggleFavorit(${p.id})">★ Treure Favorit</button>
+                </div>
+                `;
+            }).join('');
         }
 
         // Modal simple
