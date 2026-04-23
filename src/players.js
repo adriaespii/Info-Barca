@@ -12,7 +12,7 @@ const localPlayersData = [
         "redCards": 0,
         "injured": false,
         "injuryDesc": null,
-        "image": "https://www.fcbarcelona.com/photo-resources/2025/09/09/81c7699c-1298-45d6-834e-df72d8c550c8/01-Joan_Garcia.png?width=670&height=790"
+        "image": "https://www.fcbarcelona.com/photo-resources/2025/09/09/81c7699c-1298-45d6-834e-df72d8c550c8/01-Joan_Garcia.jpg?width=600&height=600"
     },
     {
         "id": 25,
